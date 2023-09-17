@@ -1,0 +1,1 @@
+{"data": [{"store": "first", "city": "moscow", "division": "tuy5r", "type_format": 1, "loc": 3, "size": 19, "is_active": 0}, {"store": "second", "city": "magadan", "division": "tsdfr", "type_format": 3, "loc": 5, "size": 31, "is_active": 1}, {"store": "third", "city": "moscow", "division": "tsdfr", "type_format": 3, "loc": 5, "size": 31, "is_active": 0}]}
