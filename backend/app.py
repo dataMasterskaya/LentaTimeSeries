@@ -1,8 +1,11 @@
+import argparse
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 import uvicorn
 import requests
 import json
-from model import predictions
+import numpy as np
+# from model import predictions
 import logging
 
 app = FastAPI()
@@ -16,10 +19,18 @@ app_logger.addHandler(app_handler)
 
 
 @app.get("/")
-def main() -> dict:
+def main():
     """main handler"""
+    html_content = """
+            <body>
+            <form action="/forecast" method="post">
+            <input name="write forecast">
+            <input type="submit", value="Write Forecast">
+            </form>
+            </body>
+            """
     app_logger.info(f'successfully started')
-    return {"status": "OK", "message": "it's alive"}
+    return HTMLResponse(content=html_content)
 
 
 @app.get("/categories")
@@ -64,7 +75,7 @@ def get_stores(city='moscow', cat=3) -> dict:
     return {"status": "OK", "city": city, "city_query": city_l, "type": cat, "type_query": type_l}
 
 
-@app.get("/forecast")
+@app.get("/predict")
 def get_predictions() -> dict:
     """collect data from database and ask to model"""
     cat = requests.get("http://localhost:8000/categories")
@@ -72,7 +83,7 @@ def get_predictions() -> dict:
     stores = requests.get("http://localhost:8000/stores")
     if cat.status_code == 200 and sales.status_code == 200 and stores.status_code == 200:
         app_logger.info(f'prediction model running')
-        result = predictions(cat.json(), sales.json(), stores.json())
+        result = 42  # predictions(cat.json(), sales.json(), stores.json())
         status = 'success'
     else:
         app_logger.error(f'some error with handlers')
@@ -81,21 +92,44 @@ def get_predictions() -> dict:
     return {"status": status, "data": result}
 
 
-# а вот тут я запутался в методах post и get
-@app.get("/save")
+@app.post("/forecast")
 def save_forecast() -> dict:
     """save forecast results in file"""
-    forecast = requests.get("http://localhost:8000/forecast")
-    if forecast.status_code == 200:
-        result = forecast.json()
-        json.dump(result, open('forecast_archive.json', 'a'))
-        app_logger.info(f'successfully added')
-        status = 'success'
-    else:
-        app_logger.error(f'model is not available')
-        status = 'fail'
+    label = np.random.randint(100)
+    forecast = {"data": [
+        {"store": "sdfds1",
+         "forecast_date": "2023-09-01",
+         "forecast": {"sku": "sdf",
+                      "sales_units": {"2023-09-01": label,
+                                      "2023-09-02": 0,
+                                      "2023-09-03": 0,
+                                      "2023-09-04": 0,
+                                      "2023-09-05": 0,
+                                      }}}]}
+    json.dump(forecast, open('forecast_archive.json', 'w'))
+    app_logger.info(f'successfully added')
+    status = 'success'
     return {"status": status}
 
 
+@app.get("/forecast")
+def load_forecast() -> dict:
+    """save forecast results in file"""
+    try:
+        f = open('forecast_archive.json', 'r')
+        result = json.load(f)
+        app_logger.info(f'successfully loaded')
+        status = 'success'
+    except:
+        result = 'no data'
+        app_logger.error(f'archive not available')
+        status = 'fail'
+    return {"status": status, "data": result}
+
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="localhost", port=8000)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", default=8000, type=int, dest="port")
+    parser.add_argument("--host", default="localhost", type=str, dest="host")
+    args = vars(parser.parse_args())
+    uvicorn.run(app, **args)
