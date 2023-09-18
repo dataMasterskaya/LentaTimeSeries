@@ -20,7 +20,7 @@ docker build --tag timeseries .
 docker run --rm -it -p 8010:8000 --name lenta timeseries
 ```
 
-**После этого модель доступна по адресу**
+**После этого сервис работает по адресу**
 ```bash
 localhost:8010/
 ```
