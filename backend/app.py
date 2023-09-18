@@ -2,10 +2,8 @@ import argparse
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 import uvicorn
-import requests
 import json
 import numpy as np
-# from model import predictions
 import logging
 
 app = FastAPI()
@@ -75,23 +73,6 @@ def get_stores(city='moscow', cat=3) -> dict:
     return {"status": "OK", "city": city, "city_query": city_l, "type": cat, "type_query": type_l}
 
 
-@app.get("/predict")
-def get_predictions() -> dict:
-    """collect data from database and ask to model"""
-    cat = requests.get("http://localhost:8000/categories")
-    sales = requests.get("http://localhost:8000/sales")
-    stores = requests.get("http://localhost:8000/stores")
-    if cat.status_code == 200 and sales.status_code == 200 and stores.status_code == 200:
-        app_logger.info(f'prediction model running')
-        result = 42  # predictions(cat.json(), sales.json(), stores.json())
-        status = 'success'
-    else:
-        app_logger.error(f'some error with handlers')
-        result = 'error'
-        status = 'fail'
-    return {"status": status, "data": result}
-
-
 @app.post("/forecast")
 def save_forecast() -> dict:
     """save forecast results in file"""
@@ -120,7 +101,7 @@ def load_forecast() -> dict:
         result = json.load(f)
         app_logger.info(f'successfully loaded')
         status = 'success'
-    except:
+    except FileNotFoundError:
         result = 'no data'
         app_logger.error(f'archive not available')
         status = 'fail'
@@ -130,6 +111,6 @@ def load_forecast() -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", default=8000, type=int, dest="port")
-    parser.add_argument("--host", default="localhost", type=str, dest="host")
+    parser.add_argument("--host", default="0.0.0.0", type=str, dest="host")
     args = vars(parser.parse_args())
     uvicorn.run(app, **args)
