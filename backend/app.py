@@ -114,7 +114,7 @@ def save_forecast() -> dict:
 
 @app.get("/forecast")
 def load_forecast() -> dict:
-    """save forecast results in file"""
+    """load forecast results from file"""
     try:
         f = open('forecast_archive.json', 'r')
         result = json.load(f)
