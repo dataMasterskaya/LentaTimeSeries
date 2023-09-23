@@ -11,24 +11,14 @@ handler_m.setFormatter(formatter_m)
 m_logger.addHandler(handler_m)
 
 
-def predictions(cats: dict, sales: dict, stores: dict) -> json:
-    """some ML magic here"""
-    luck = np.random.rand(1)[0]
-    if luck < .5:
-        m_logger.error(f'something went wrong')
-        result = ':('
-    else:
-        m_logger.info(f'success')
-        result = {"data": [
-        {"store": stores["city"].upper(),
-         "sku": len(cats) + len(sales),
-         "forecast_date": "2023-09-01",
-         "forecast": {"2023-09-01": 111,
-                      "2023-09-02": 111,
-                      "2023-09-03": 111,
-                      "2023-09-04": 111,
-                      "2023-09-05": 111}
-        }
-        ]
-        }
-    return json.dumps(result)
+def forecast(sales: dict, item_info: dict, store_info: dict) -> list:
+    """
+    Функция для предсказания продажЖ
+    :params sales: исторические данные по продажам
+    :params item_info: характеристики товара
+    :params store_info: характеристики магазина
+
+    """
+    sales = [el["sales_units"] for el in sales]
+    mean_sale = sum(sales) / len(sales)
+    return [mean_sale] * 5
