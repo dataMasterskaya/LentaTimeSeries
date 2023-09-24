@@ -10,21 +10,16 @@ from typing import Dict, List
 
 app = FastAPI()
 
-app_logger = logging.getLogger(__name__)
-app_logger.setLevel(logging.INFO)
-app_handler = logging.StreamHandler()
-app_formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
-app_handler.setFormatter(app_formatter)
-app_logger.addHandler(app_handler)
+_logger = logging.getLogger(__name__)
 
 
 @app.get("/")
 def main():
     """main handler"""
     html_content = """
-            Sales forecast system.
+            <h1>Sales forecast system.</h1>
             """
-    app_logger.info(f'successfully started')
+    _logger.info(f'successfully started')
     return HTMLResponse(content=html_content)
 
 
@@ -32,7 +27,7 @@ def main():
 def get_cat() -> dict:
     """returns whole categories data"""
     resp = json.load(open("categories.json"))
-    app_logger.info(f'categories data loaded')
+    _logger.info(f'categories data loaded')
     resp["status"] = "OK"
     return resp
 
@@ -75,7 +70,7 @@ def save_forecast(data: Forecast) -> dict:
                                       "2023-09-05": 0,
                                       }}}]}
     json.dump(forecast, open('forecast_archive.json', 'w'))
-    app_logger.info(f'successfully added')
+    _logger.info(f'successfully added')
     status = 'success'
     return {"status": status}
 
@@ -86,16 +81,26 @@ def load_forecast() -> dict:
     try:
         f = open('forecast_archive.json', 'r')
         result = json.load(f)
-        app_logger.info(f'successfully loaded')
+        _logger.info(f'successfully loaded')
         status = 'success'
     except FileNotFoundError:
         result = 'no data'
-        app_logger.error(f'archive not available')
+        _logger.error(f'archive not available')
         status = 'fail'
     return {"status": status, "data": result}
 
 
+def setup_logging():
+    app_logger = logging.getLogger(__name__)
+    app_logger.setLevel(logging.INFO)
+    app_handler = logging.StreamHandler()
+    app_formatter = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
+    app_handler.setFormatter(app_formatter)
+    app_logger.addHandler(app_handler)
+
+
 if __name__ == "__main__":
+    setup_logging()
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", default=8000, type=int, dest="port")
     parser.add_argument("--host", default="0.0.0.0", type=str, dest="host")

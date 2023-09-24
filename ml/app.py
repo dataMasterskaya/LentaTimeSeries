@@ -1,12 +1,9 @@
 import requests
 import os
-from urllib.parse import urljoin
-import configargparse
 import logging
 from datetime import date, timedelta
 
 from model import forecast
-
 
 URL_CATEGORIES = "categories"
 URL_SALES = "sales"
@@ -17,6 +14,15 @@ api_port = os.environ.get("API_PORT", "8000")
 api_host = os.environ.get("API_PORT", "localhost")
 
 _logger = logging.getLogger(__name__)
+
+
+def setup_logging():
+    _logger = logging.getLogger(__name__)
+    _logger.setLevel(logging.DEBUG)
+    handler_m = logging.StreamHandler()
+    formatter_m = logging.Formatter("%(name)s %(asctime)s %(levelname)s %(message)s")
+    handler_m.setFormatter(formatter_m)
+    _logger.addHandler(handler_m)
 
 
 def get_address(resource):
@@ -51,6 +57,7 @@ def get_categs_info():
     resp = requests.get(categs_url)
     if resp.status_code != 200:
         _logger.warning("Could not get category info")
+        return {}
     result = {el["sku"]: el for el in resp.json()["data"]}
     return result
 
@@ -75,4 +82,5 @@ def main(today=date.today()):
 
 
 if __name__ == "__main__":
+    setup_logging()
     main()
