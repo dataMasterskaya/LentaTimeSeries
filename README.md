@@ -13,16 +13,9 @@
 /ml
 - model.py - имитация модели машинного обучения
 
-**Сборка**
-```bash
-docker build --tag timeseries .
-```
-**Запуск**
-```bash
-docker run --rm -it -p 8010:8000 --name lenta timeseries
-```
 
-**После этого сервис работает по адресу**
-```bash
-localhost:8010/
-```
+## Полезные ссылки
+- [Архитектура микросервисов](https://habr.com/ru/companies/vk/articles/320962/)
+- [Основы REST](https://tproger.ru/articles/osnovy-rest-teorija-i-praktika?ysclid=lmxefuafdd378867233)
+- [Введение в Postman](https://habr.com/ru/companies/kolesa/articles/351250/)
+- [Курс Docker c нуля](https://karpov.courses/docker)
